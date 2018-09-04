@@ -23,3 +23,8 @@ const addresses = await client.query({
 
 const externalResult = await GraphQLClient.RawQuery("query Users { users { name } }");
 ```
+
+as an express route
+```
+app.get('/user/:id', client.route("GetUsersByID"));
+```
