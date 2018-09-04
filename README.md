@@ -1,6 +1,7 @@
 # graphql-client
 
 _Example Usage_
+```js
 import GraphQLClient from 'graphql-client';
 const schema = require('./schema.gql');
 
@@ -21,3 +22,4 @@ const addresses = await client.query({
 
 
 const externalResult = await GraphQLClient.RawQuery("query Users { users { name } }");
+```
