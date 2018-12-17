@@ -6,82 +6,96 @@ const DEFAULT_CACHE: InMemoryCache = new InMemoryCache();
 const DEFAULT_CACHE_IN_MS: number = 0;
 
 type Response = {
-	status: number,
+  status: number,
 
-	errors: string[],
-	data: object,
+  errors: string[],
+  data: object,
 }
 
-type GlobalConfiguration = {
-	headers?: {},
+interface Endpoint { (req: object, res: object): void }
 
-	cacheEngine?: CacheEngineInterface,
-	cacheTimeInMs?: number,
+type GlobalConfiguration = {
+  headers?: {},
+
+  cacheEngine?: CacheEngineInterface,
+  cacheTimeInMs?: number,
 }
 
 type QueryOptions = {
-	name: String,
-	variables: object,
+  name: String,
+  variables: object,
 
-	headers?: {},
+  headers?: {},
 
-	cacheEngine?: CacheEngineInterface,
-	cacheTimeInMs?: number,
+  cacheEngine?: CacheEngineInterface,
+  cacheTimeInMs?: number,
 }
 
 const exampleResponse: Response = {
-	status: 200,
+  status: 200,
 
-	errors: [],
-	data: {},
+  errors: [],
+  data: {},
 };
 
 export default class GraphQLClient {
-	static RawQuery(schema: string, options?: QueryOptions): Response {
-		return exampleResponse;
-	}
+  static RawQuery(schema: string, options?: QueryOptions): Response {
+    return new GraphQLClient(schema).query(options);
+  }
 
-	private headers: object;
+  private headers: object;
 
-	private cacheEngine: CacheEngineInterface;
-	private cacheTimeInMs: number;
+  private cacheEngine: CacheEngineInterface;
+  private cacheTimeInMs: number;
 
-	constructor(public schema: string, options: GlobalConfiguration = {}) {
-		this.headers = DEFAULT_HEADERS;
+  constructor(public schema: string, options: GlobalConfiguration = {}) {
+    this.headers = DEFAULT_HEADERS;
 
-		this.cacheEngine = options.cacheEngine || DEFAULT_CACHE;
-		this.cacheTimeInMs = options.cacheTimeInMs || DEFAULT_CACHE_IN_MS;
-	}
+    this.cacheEngine = options.cacheEngine || DEFAULT_CACHE;
+    this.cacheTimeInMs = options.cacheTimeInMs || DEFAULT_CACHE_IN_MS;
+  }
 
-	public query(options: QueryOptions): Response;
-	public query(name: string, variables?: object): Response;
-	public query(nameOrOptions: string | QueryOptions, variablesOrNull?: object): Response {
-		const options = this.convertArgumentsToQueryOptions(nameOrOptions, variablesOrNull);
+  public query(options: QueryOptions): Response;
+  public query(name: string, variables?: object): Response;
+  public query(nameOrOptions: string | QueryOptions, variablesOrNull?: object): Response {
+    const options = this.convertArgumentsToQueryOptions(nameOrOptions, variablesOrNull);
 
-		return exampleResponse;
-	}
+    return exampleResponse;
+  }
 
-	public mutation(options: QueryOptions): Response;
-	public mutation(name: string, variables?: object): Response;
-	public mutation(nameOrOptions: string | QueryOptions, variablesOrNull?: object): Response {
-		const options = this.convertArgumentsToQueryOptions(nameOrOptions, variablesOrNull);
+  public mutation(options: QueryOptions): Response;
+  public mutation(name: string, variables?: object): Response;
+  public mutation(nameOrOptions: string | QueryOptions, variablesOrNull?: object): Response {
+    const options = this.convertArgumentsToQueryOptions(nameOrOptions, variablesOrNull);
 
-		return exampleResponse;
-	}
+    return exampleResponse;
+  }
+  
+  public endpoint(options: QueryOptions): Endpoint;
+  public endpoint(name: string, variables?: object): Endpoint;
+  public endpoint(nameOrOptions: string | QueryOptions, variablesOrNull?: object): Endpoint {
+    const options = this.convertArgumentsToQueryOptions(nameOrOptions, variablesOrNull);
 
-	private convertArgumentsToQueryOptions(nameOrOptions: string | QueryOptions, variablesOrNull?: object): QueryOptions {
-		if (typeof nameOrOptions === 'string') {
-			const name: string = nameOrOptions;
-			const variables: object = variablesOrNull || {};
+    return async function graphQLClientEndpoint(_, res): Promise<void> {
+      const response = await exampleResponse;
 
-			return {
-				name,
-				variables,
-			};
-		}
+      res.send(response);
+    };
+  }
 
-		const options: QueryOptions = nameOrOptions;
+  private convertArgumentsToQueryOptions(nameOrOptions: string | QueryOptions, variablesOrNull?: object): QueryOptions {
+    if (typeof nameOrOptions === 'string') {
+      const name: string = nameOrOptions;
+      const variables: object = variablesOrNull || {};
 
-		return options;
-	}
+      return {
+        name,
+        variables,
+      };
+    }
+
+    const options: QueryOptions = nameOrOptions;
+
+    return options;
+  }
 }
